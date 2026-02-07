@@ -107,6 +107,20 @@ def categorize_task(title: str, description: str = '') -> str:
     return 'General'
 
 
+def ensure_nltk_data():
+    """Ensure required NLTK data is downloaded."""
+    import nltk
+    required_resources = ['punkt_tab', 'averaged_perceptron_tagger_eng']
+    for resource in required_resources:
+        try:
+            nltk.data.find(f'tokenizers/{resource}' if 'punkt' in resource else f'taggers/{resource}')
+        except (LookupError, AttributeError):
+            try:
+                nltk.download(resource, quiet=True)
+            except Exception:
+                pass
+
+
 def estimate_difficulty(title: str, description: str = '') -> dict:
     """
     Estimate task difficulty using NLP analysis with TextBlob.
@@ -125,6 +139,7 @@ def estimate_difficulty(title: str, description: str = '') -> dict:
     Returns:
         dict: Contains 'level' (easy/medium/hard), 'score' (1-10), and 'reasons'
     """
+    ensure_nltk_data()
     text = (title + ' ' + description).strip()
     text_lower = text.lower()
     
@@ -133,7 +148,15 @@ def estimate_difficulty(title: str, description: str = '') -> dict:
     reasons = []
     
     # Use TextBlob for NLP analysis
-    blob = TextBlob(text)
+    try:
+        blob = TextBlob(text)
+    except Exception:
+        # Fallback if TextBlob initialization fails
+        return {
+            'level': 'medium',
+            'score': 5.0,
+            'reasons': ["AI analysis unavailable"]
+        }
     
     # 1. Analyze word count
     word_count = len(blob.words)

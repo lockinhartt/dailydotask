@@ -532,8 +532,11 @@
             const startedAt = localStorage.getItem('timerStartedAt');
             if (!startedAt) return;
 
+            // Parse the UTC timestamp properly - Date constructor handles timezone conversion
             const start = new Date(startedAt);
             const now = new Date();
+            
+            console.log('Start time:', start.toISOString(), 'Now:', now.toISOString());
             
             // Validate dates to prevent NaN
             if (isNaN(start.getTime())) {
@@ -544,10 +547,14 @@
             
             const elapsed = Math.floor((now - start) / 1000); // total seconds
             
+            console.log('Elapsed seconds:', elapsed);
+            
             // Prevent negative values
             if (elapsed < 0) {
-                console.error('Negative elapsed time detected');
+                console.error('Negative elapsed time detected. Start:', start.toISOString(), 'Now:', now.toISOString());
+                // Clear localStorage and reload
                 localStorage.removeItem('timerStartedAt');
+                localStorage.removeItem('activeTimer');
                 return;
             }
 
@@ -601,7 +608,10 @@
                         document.querySelectorAll('.btn-status').forEach(btn => {
                             btn.classList.remove('active');
                         });
-                        document.querySelector(`.btn-status.status-${newStatus}`).classList.add('active');
+                        const statusBtn = document.querySelector(`.btn-status.status-${newStatus}`);
+                        if (statusBtn) {
+                            statusBtn.classList.add('active');
+                        }
 
                         // Reload if completed to show completion message
                         if (newStatus === 'completed') {

@@ -5,6 +5,18 @@ from .models import Task
 class TaskForm(forms.ModelForm):
     """Form for creating and updating tasks."""
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make all fields required except estimated_duration
+        required_fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time', 'time_limit']
+        for field_name in required_fields:
+            if field_name in self.fields:
+                self.fields[field_name].required = True
+        
+        # Set estimated_duration as optional
+        if 'estimated_duration' in self.fields:
+            self.fields['estimated_duration'].required = False
+    
     class Meta:
         model = Task
         fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time', 'time_limit', 'estimated_duration']

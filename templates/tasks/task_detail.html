@@ -447,6 +447,7 @@
         let activeTimer = {% if task.timer_started_at %}true{% else %} false{% endif %};
         let timerInterval = null;
         const taskId = {{ task.pk }};
+        const estimatedDuration = {% if task.estimated_duration %}{{ task.estimated_duration }}{% else %}null{% endif %};  // Estimated duration in minutes for auto-complete
         /* eslint-enable */
 
         function toggleTimer() {
@@ -548,6 +549,26 @@
 
             const display = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             document.getElementById('timer-display').textContent = display;
+
+            // Auto-stop when estimated duration is reached
+            if (estimatedDuration !== null) {
+                const elapsedMinutes = Math.floor(elapsed / 60);
+                if (elapsedMinutes >= estimatedDuration) {
+                    // Estimated duration reached! Auto-stop and complete the task
+                    stopTimer();
+
+                    // Auto-complete the task
+                    updateStatus('completed');
+
+                    // Show alert to user
+                    alert(`⏱️ Estimated duration reached! Task has been automatically completed.`);
+
+                    // Reload page to show completed status
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            }
         }
 
         function updateStatus(newStatus) {

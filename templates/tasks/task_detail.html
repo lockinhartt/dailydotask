@@ -478,8 +478,11 @@
                     if (data.status === 'started') {
                         activeTimer = true;
                         localStorage.setItem('activeTimer', taskId);
-                        localStorage.setItem('timerStartedAt', data.started_at);
-                        console.log('Timer started at:', data.started_at);
+                        // Use CLIENT time instead of server time to avoid clock sync issues
+                        const clientStartTime = new Date().toISOString();
+                        localStorage.setItem('timerStartedAt', clientStartTime);
+                        console.log('Timer started at (CLIENT TIME):', clientStartTime);
+                        console.log('Server time was:', data.started_at);
                         updateTimerUI(true);
                         timerInterval = setInterval(updateRunningTimer, 1000);
                         updateRunningTimer(); // Update display immediately

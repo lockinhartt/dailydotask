@@ -7,7 +7,7 @@ class TaskForm(forms.ModelForm):
     
     class Meta:
         model = Task
-        fields = ['title', 'description', 'priority', 'due_date']
+        fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time', 'estimated_duration', 'time_limit']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -21,8 +21,49 @@ class TaskForm(forms.ModelForm):
             'priority': forms.Select(attrs={
                 'class': 'form-select'
             }),
+            'status': forms.Select(attrs={
+                'class': 'form-select'
+            }),
             'due_date': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
             }),
+            'due_time': forms.TimeInput(attrs={
+                'class': 'form-control',
+                'type': 'time'
+            }),
+            'estimated_duration': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Duration in minutes',
+                'min': '1',
+                'step': '5'
+            }),
         }
+
+
+class ProfileForm(forms.ModelForm):
+    """Form for updating user profile information."""
+    
+    class Meta:
+        from django.contrib.auth.models import User
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Username'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Email address'
+            }),
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'First name'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Last name'
+            }),
+        }
+

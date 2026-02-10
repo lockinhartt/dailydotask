@@ -1,1 +1,1 @@
-web: gunicorn ai_todo.wsgi
+web: gunicorn ai_todo.wsgi --log-file -

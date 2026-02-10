@@ -23,6 +23,11 @@ class Task(models.Model):
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     due_date = models.DateField(null=True, blank=True)
+    due_time = models.TimeField(null=True, blank=True)
+    estimated_duration = models.IntegerField(null=True, blank=True, help_text="Estimated duration in minutes")
+    time_limit = models.IntegerField(null=True, blank=True, help_text="Time limit in minutes - task auto-completes when timer reaches this")
+    time_spent = models.IntegerField(default=0, help_text="Actual time spent in minutes")
+    timer_started_at = models.DateTimeField(null=True, blank=True, help_text="When the current timer started")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

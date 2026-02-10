@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Daily Do</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-info {
+            background: #f7fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-info .label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-info .value {
+            font-size: 1.125rem;
+            color: #2d3748;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+            <p>Manage your account settings and credentials</p>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Profile Information Card -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-id-card"></i> Profile Information</h2>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="{{ profile_form.username.id_for_label }}" class="form-label">
+                            <i class="fas fa-user"></i> Username *
+                        </label>
+                        {{ profile_form.username }}
+                        {% if profile_form.username.errors %}
+                        <div class="text-danger mt-1">{{ profile_form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="{{ profile_form.email.id_for_label }}" class="form-label">
+                            <i class="fas fa-envelope"></i> Email Address *
+                        </label>
+                        {{ profile_form.email }}
+                        {% if profile_form.email.errors %}
+                        <div class="text-danger mt-1">{{ profile_form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="{{ profile_form.first_name.id_for_label }}" class="form-label">
+                            <i class="fas fa-signature"></i> First Name
+                        </label>
+                        {{ profile_form.first_name }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="{{ profile_form.last_name.id_for_label }}" class="form-label">
+                            <i class="fas fa-signature"></i> Last Name
+                        </label>
+                        {{ profile_form.last_name }}
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <a href="{% url 'index' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Tasks
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Change Password Card -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-key"></i> Change Password</h2>
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="change_password" value="1">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="{{ password_form.old_password.id_for_label }}" class="form-label">
+                            <i class="fas fa-lock"></i> Current Password
+                        </label>
+                        {{ password_form.old_password }}
+                        {% if password_form.old_password.errors %}
+                        <div class="text-danger mt-1">{{ password_form.old_password.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="{{ password_form.new_password1.id_for_label }}" class="form-label">
+                            <i class="fas fa-lock"></i> New Password
+                        </label>
+                        {{ password_form.new_password1 }}
+                        {% if password_form.new_password1.errors %}
+                        <div class="text-danger mt-1">{{ password_form.new_password1.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="{{ password_form.new_password2.id_for_label }}" class="form-label">
+                            <i class="fas fa-lock"></i> Confirm New Password
+                        </label>
+                        {{ password_form.new_password2 }}
+                        {% if password_form.new_password2.errors %}
+                        <div class="text-danger mt-1">{{ password_form.new_password2.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

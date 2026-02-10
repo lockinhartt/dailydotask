@@ -55,17 +55,46 @@ def logout_view(request):
 def index(request):
     """Main view displaying all tasks for the logged-in user."""
     from django.utils import timezone
-    from datetime import timedelta
+    from datetime import datetime, timedelta
     
     tasks = Task.objects.filter(user=request.user)
     form = TaskForm()
     
     # Calculate stats
-    today = timezone.now().date()
+    now = timezone.now()
+    today = now.date()
     total_tasks = tasks.count()
     pending_tasks = tasks.filter(status='pending').count()
     completed_today = tasks.filter(status='completed', updated_at__date=today).count()
     
+    # Add overdue status to each task
+    tasks_with_status = []
+    for task in tasks:
+        task.is_overdue = False
+        if task.due_date and task.status != 'completed':
+            if task.due_time:
+                # Combine date and time for comparison
+                task_deadline = timezone.make_aware(
+                    datetime.combine(task.due_date, task.due_time)
+                )
+                task.is_overdue = now > task_deadline
+            else:
+                # Only date set, compare dates
+                task.is_overdue = today > task.due_date
+        tasks_with_status.append(task)
+    
+    context = {
+        'tasks': tasks_with_status,
+        'total_tasks': total_tasks,
+        'pending_tasks': pending_tasks,
+        'completed_today': completed_today,
+    }
+    return render(request, 'tasks/index.html', context)
+
+
+@login_required
+def create_task_view(request):
+    """Dedicated page for creating a new task."""
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
@@ -83,22 +112,33 @@ def index(request):
             task.ai_difficulty_reasons = ', '.join(difficulty['reasons'])
             
             task.save()
+            messages.success(request, f'Task "{task.title}" created successfully!')
             return redirect('index')
+    else:
+        form = TaskForm()
     
-    context = {
-        'tasks': tasks,
-        'form': form,
-        'total_tasks': total_tasks,
-        'pending_tasks': pending_tasks,
-        'completed_today': completed_today,
-    }
-    return render(request, 'tasks/index.html', context)
+    return render(request, 'tasks/create_task.html', {'form': form})
 
 
 @login_required
 def update_task(request, pk):
     """Update a task."""
+    from django.http import JsonResponse
     task = get_object_or_404(Task, pk=pk, user=request.user)
+    
+    if request.method == 'GET':
+        # Return task data as JSON for modal
+        return JsonResponse({
+            'id': task.pk,
+            'title': task.title,
+            'description': task.description,
+            'priority': task.priority,
+            'status': task.status,
+            'due_date': task.due_date.isoformat() if task.due_date else '',
+            'due_time': task.due_time.isoformat() if task.due_time else '',
+            'estimated_duration': task.estimated_duration or '',
+            'time_limit': task.time_limit or '',
+        })
     
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task)
@@ -120,13 +160,303 @@ def delete_task(request, pk):
 
 @login_required
 def toggle_status(request, pk):
-    """Toggle task completion status."""
+    """Cycle task status through all states."""
     task = get_object_or_404(Task, pk=pk, user=request.user)
     
-    if task.status == 'completed':
-        task.status = 'pending'
-    else:
+    # Cycle: pending -> in_progress -> completed -> pending
+    if task.status == 'pending':
+        task.status = 'in_progress'
+    elif task.status == 'in_progress':
         task.status = 'completed'
+    else:
+        task.status = 'pending'
     
     task.save()
     return redirect('index')
+@login_required
+def filtered_tasks(request, filter_type='all'):
+    """View displaying filtered tasks based on status."""
+    from django.utils import timezone
+    from datetime import datetime
+    
+    tasks = Task.objects.filter(user=request.user)
+    form = TaskForm()
+    
+    # Calculate stats
+    now = timezone.now()
+    today = now.date()
+    total_tasks = tasks.count()
+    pending_tasks = tasks.filter(status='pending').count()
+    completed_today = tasks.filter(status='completed', updated_at__date=today).count()
+    
+    # Add overdue status and filter tasks
+    tasks_with_status = []
+    for task in tasks:
+        task.is_overdue = False
+        if task.due_date and task.status != 'completed':
+            if task.due_time:
+                task_deadline = timezone.make_aware(
+                    datetime.combine(task.due_date, task.due_time)
+                )
+                task.is_overdue = now > task_deadline
+            else:
+                task.is_overdue = today > task.due_date
+        
+        # Filter by type
+        include_task = False
+        if filter_type == 'all':
+            include_task = True
+        elif filter_type == 'pending':
+            include_task = task.status == 'pending'
+        elif filter_type == 'in_progress':
+            include_task = task.status == 'in_progress'
+        elif filter_type == 'completed':
+            include_task = task.status == 'completed'
+        elif filter_type == 'overdue':
+            include_task = task.is_overdue
+        
+        if include_task:
+            tasks_with_status.append(task)
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            
+            task.ai_suggested_priority = predict_priority(task.title, task.description)
+            task.ai_category = categorize_task(task.title, task.description)
+            difficulty = estimate_difficulty(task.title, task.description)
+            task.ai_difficulty = difficulty['level']
+            task.ai_difficulty_score = difficulty['score']
+            task.ai_difficulty_reasons = ', '.join(difficulty['reasons'])
+            
+            task.save()
+            if filter_type == 'all':
+                return redirect('index')
+            else:
+                return redirect('tasks_' + filter_type)
+    
+    context = {
+        'tasks': tasks_with_status,
+        'form': form,
+        'total_tasks': total_tasks,
+        'pending_tasks': pending_tasks,
+        'completed_today': completed_today,
+        'current_filter': filter_type,
+    }
+    return render(request, 'tasks/index.html', context)
+@login_required
+def create_task_view(request):
+    """Dedicated view for creating new tasks."""
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            
+            # Apply AI predictions
+            task.ai_suggested_priority = predict_priority(task.title, task.description)
+            task.ai_category = categorize_task(task.title, task.description)
+            difficulty = estimate_difficulty(task.title, task.description)
+            task.ai_difficulty = difficulty['level']
+            task.ai_difficulty_score = difficulty['score']
+            task.ai_difficulty_reasons = ', '.join(difficulty['reasons'])
+            
+            task.save()
+            messages.success(request, 'Task created successfully!')
+            return redirect('index')
+    else:
+        form = TaskForm()
+    
+    return render(request, 'tasks/create_task.html', {'form': form})
+@login_required
+def start_timer(request, pk):
+    """Start the timer for a task."""
+    from django.http import JsonResponse
+    from django.utils import timezone
+    
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    
+    # Stop any other running timers for this user
+    Task.objects.filter(user=request.user, timer_started_at__isnull=False).update(
+        time_spent=models.F('time_spent') + 0,  # Keep existing time
+        timer_started_at=None
+    )
+    
+    # Start timer for this task
+    task.timer_started_at = timezone.now()
+    task.save()
+    
+    return JsonResponse({
+        'status': 'started',
+        'task_id': task.pk,
+        'started_at': task.timer_started_at.isoformat()
+    })
+
+
+@login_required
+def stop_timer(request, pk):
+    """Stop the timer for a task and save elapsed time."""
+    from django.http import JsonResponse
+    from django.utils import timezone
+    
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    
+    if task.timer_started_at:
+        # Calculate elapsed time in minutes
+        elapsed = timezone.now() - task.timer_started_at
+        elapsed_minutes = int(elapsed.total_seconds() / 60)
+        
+        # Add to existing time spent
+        task.time_spent += elapsed_minutes
+        task.timer_started_at = None
+        task.save()
+        
+        return JsonResponse({
+            'status': 'stopped',
+            'task_id': task.pk,
+            'time_spent': task.time_spent,
+            'elapsed_minutes': elapsed_minutes
+        })
+    
+    return JsonResponse({'status': 'not_running', 'task_id': task.pk})
+@login_required
+def task_detail(request, pk):
+    """Detailed view of a single task with all controls."""
+    from django.utils import timezone
+    from datetime import datetime
+    
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    
+    # Calculate if task is overdue
+    now = timezone.now()
+    today = now.date()
+    task.is_overdue = False
+    if task.due_date and task.status != 'completed':
+        if task.due_time:
+            task_deadline = timezone.make_aware(
+                datetime.combine(task.due_date, task.due_time)
+            )
+            task.is_overdue = now > task_deadline
+        else:
+            task.is_overdue = today > task.due_date
+    
+    context = {
+        'task': task,
+    }
+    return render(request, 'tasks/task_detail.html', context)
+
+
+@login_required
+def update_task_status(request, pk):
+    """Update task status via AJAX."""
+    from django.http import JsonResponse
+    
+    if request.method == 'POST':
+        task = get_object_or_404(Task, pk=pk, user=request.user)
+        new_status = request.POST.get('status')
+        
+        if new_status in ['pending', 'in_progress', 'completed']:
+            task.status = new_status
+            task.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'new_status': new_status,
+                'display_status': task.get_status_display()
+            })
+    
+    return JsonResponse({'status': 'error'}, status=400)
+@login_required
+def start_timer(request, pk):
+    """Start the timer for a task."""
+    from django.http import JsonResponse
+    from django.utils import timezone
+    from django.db import models
+    
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    
+    # Stop any other running timers for this user
+    Task.objects.filter(user=request.user, timer_started_at__isnull=False).exclude(pk=pk).update(
+        timer_started_at=None
+    )
+    
+    # Start timer for this task
+    task.timer_started_at = timezone.now()
+    task.save()
+    
+    return JsonResponse({
+        'status': 'started',
+        'task_id': task.pk,
+        'started_at': task.timer_started_at.isoformat()
+    })
+
+
+@login_required
+def stop_timer(request, pk):
+    """Stop the timer for a task and save elapsed time."""
+    from django.http import JsonResponse
+    from django.utils import timezone
+    
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    
+    if task.timer_started_at:
+        # Calculate elapsed time in minutes
+        elapsed = timezone.now() - task.timer_started_at
+        elapsed_minutes = int(elapsed.total_seconds() / 60)
+        
+        # Add to existing time spent
+        task.time_spent += elapsed_minutes
+        task.timer_started_at = None
+        # Automatically mark as completed when timer stops
+        task.status = 'completed'
+        task.save()
+        
+        return JsonResponse({
+            'status': 'stopped',
+            'task_id': task.pk,
+            'time_spent': task.time_spent,
+            'elapsed_minutes': elapsed_minutes,
+            'task_status': 'completed'
+        })
+    
+    return JsonResponse({'status': 'not_running', 'task_id': task.pk})
+
+
+@login_required
+def profile_view(request):
+    """View and edit user profile."""
+    from .forms import ProfileForm
+    from django.contrib.auth.forms import PasswordChangeForm
+    from django.contrib.auth import update_session_auth_hash
+    
+    if request.method == 'POST':
+        # Handle password change
+        if 'change_password' in request.POST:
+            password_form = PasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)  # Keep user logged in
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('profile')
+            else:
+                profile_form = ProfileForm(instance=request.user)
+        # Handle profile update
+        else:
+            profile_form = ProfileForm(request.POST, instance=request.user)
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, 'Your profile was successfully updated!')
+                return redirect('profile')
+            password_form = PasswordChangeForm(request.user)
+    else:
+        profile_form = ProfileForm(instance=request.user)
+        password_form = PasswordChangeForm(request.user)
+    
+    context = {
+        'profile_form': profile_form,
+        'password_form': password_form,
+    }
+    return render(request, 'tasks/profile.html', context)
+

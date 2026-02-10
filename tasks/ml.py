@@ -127,7 +127,7 @@ def ensure_nltk_data():
     for path, resource in required_resources:
         try:
             nltk.data.find(path)
-        except (LookupError, AttributeError):
+        except (LookupError, AttributeError, OSError, Exception):
             try:
                 # Try downloading to local project folder
                 nltk.download(resource, download_dir=PROJECT_NLTK_DATA, quiet=True)

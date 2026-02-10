@@ -352,7 +352,7 @@
                     </div>
                     <div class="time-stat">
                         <div class="time-stat-label">Actual</div>
-                        <div class="time-stat-value">{{ task.time_spent }}m</div>
+                        <div class="time-stat-value" id="actual-time-display">{{ task.time_spent }}m</div>
                     </div>
                 </div>
             </div>
@@ -551,9 +551,15 @@
             const display = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             document.getElementById('timer-display').textContent = display;
 
+            // Update "Actual" time display with elapsed minutes
+            const elapsedMinutes = Math.floor(elapsed / 60);
+            const actualDisplay = document.getElementById('actual-time-display');
+            if (actualDisplay) {
+                actualDisplay.textContent = `${elapsedMinutes}m`;
+            }
+
             // Auto-stop when estimated duration is reached
             if (estimatedDuration !== null) {
-                const elapsedMinutes = Math.floor(elapsed / 60);
                 if (elapsedMinutes >= estimatedDuration) {
                     // Estimated duration reached! Auto-stop and complete the task
                     stopTimer();

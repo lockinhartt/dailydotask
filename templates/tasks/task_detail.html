@@ -447,7 +447,7 @@
         let activeTimer = {% if task.timer_started_at %}true{% else %} false{% endif %};
         let timerInterval = null;
         const taskId = {{ task.pk }};
-        const timeLimit = {% if task.time_limit %}{ { task.time_limit } } {% else %} null{% endif %};  // User-set time limit in minutes
+        const timeLimit = {% if task.time_limit %}{{ task.time_limit }}{% else %}null{% endif %};  // User-set time limit in minutes
         /* eslint-enable */
 
         function toggleTimer() {

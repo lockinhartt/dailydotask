@@ -447,7 +447,6 @@
         let activeTimer = {% if task.timer_started_at %}true{% else %} false{% endif %};
         let timerInterval = null;
         const taskId = {{ task.pk }};
-        const timeLimit = {% if task.time_limit %}{{ task.time_limit }}{% else %}null{% endif %};  // User-set time limit in minutes
         /* eslint-enable */
 
         function toggleTimer() {
@@ -526,7 +525,22 @@
 
             const start = new Date(startedAt);
             const now = new Date();
+            
+            // Validate dates to prevent NaN
+            if (isNaN(start.getTime())) {
+                console.error('Invalid timer start date');
+                localStorage.removeItem('timerStartedAt');
+                return;
+            }
+            
             const elapsed = Math.floor((now - start) / 1000); // total seconds
+            
+            // Prevent negative values
+            if (elapsed < 0) {
+                console.error('Negative elapsed time detected');
+                localStorage.removeItem('timerStartedAt');
+                return;
+            }
 
             const hours = Math.floor(elapsed / 3600);
             const minutes = Math.floor((elapsed % 3600) / 60);
@@ -534,27 +548,6 @@
 
             const display = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             document.getElementById('timer-display').textContent = display;
-
-            // Auto-stop when time limit is reached
-            if (timeLimit !== null) {
-                const elapsedMinutes = Math.floor(elapsed / 60);
-                if (elapsedMinutes >= timeLimit) {
-                    // Time limit reached! Auto-stop and complete the task
-                    stopTimer();
-
-                    // Auto-complete the task
-                    updateStatus('completed');
-
-                    // Show alert to user
-                    const taskTitle = document.querySelector('.task-title').textContent;
-                    alert(`⏱️ Time limit reached! Task has been automatically completed.`);
-
-                    // Reload page to show completed status
-                    setTimeout(() => {
-                        location.reload();
-                    }, 2000);
-                }
-            }
         }
 
         function updateStatus(newStatus) {

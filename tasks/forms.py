@@ -8,7 +8,7 @@ class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Make all fields required except estimated_duration
-        required_fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time', 'time_limit']
+        required_fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time']
         for field_name in required_fields:
             if field_name in self.fields:
                 self.fields[field_name].required = True
@@ -19,7 +19,7 @@ class TaskForm(forms.ModelForm):
     
     class Meta:
         model = Task
-        fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time', 'time_limit', 'estimated_duration']
+        fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time', 'estimated_duration']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Task title', 'required': True}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Task description', 'required': True}),
@@ -27,7 +27,6 @@ class TaskForm(forms.ModelForm):
             'status': forms.Select(attrs={'class': 'form-select', 'required': True}),
             'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': True}),
             'due_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time', 'required': True}),
-            'time_limit': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Time limit in minutes', 'min': 1, 'step': 5, 'required': True}),
             'estimated_duration': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Estimated duration in minutes', 'min': 1}),
         }
 

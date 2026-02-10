@@ -459,11 +459,13 @@
         }
 
         function startTimer() {
+            console.log('startTimer() called - Task ID:', taskId);
             // Auto-update status to "in progress" when timer starts
             if ('{{ task.status }}' !== 'in_progress') {
                 updateStatus('in_progress');
             }
 
+            console.log('Fetching /start-timer/' + taskId + '/');
             fetch(`/start-timer/${taskId}/`, {
                 method: 'POST',
                 headers: {
@@ -472,19 +474,22 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Start timer response:', data);
                     if (data.status === 'started') {
                         activeTimer = true;
                         localStorage.setItem('activeTimer', taskId);
                         localStorage.setItem('timerStartedAt', data.started_at);
+                        console.log('Timer started at:', data.started_at);
                         updateTimerUI(true);
                         timerInterval = setInterval(updateRunningTimer, 1000);
                         updateRunningTimer(); // Update display immediately
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => console.error('startTimer ERROR:', error));
         }
 
         function stopTimer() {
+            console.log('stopTimer() called - Task ID:', taskId);
             fetch(`/stop-timer/${taskId}/`, {
                 method: 'POST',
                 headers: {
@@ -493,6 +498,7 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Stop timer response:', data);
                     if (data.status === 'stopped') {
                         clearInterval(timerInterval);
                         activeTimer = false;
@@ -500,9 +506,10 @@
                         localStorage.removeItem('timerStartedAt');
                         updateTimerUI(false);
                         document.getElementById('timer-display').textContent = `${data.time_spent} min`;
+                        console.log('Timer stopped. Time spent:', data.time_spent);
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => console.error('stopTimer ERROR:', error));
         }
 
         function updateTimerUI(isRunning) {

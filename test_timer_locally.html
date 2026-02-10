@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timer Test</title>
+</head>
+<body>
+    <h1>Timer Test Page</h1>
+    <div id="timer-display">00:00:00</div>
+    <button id="timer-btn" onclick="toggleTimer()">
+        <span id="timer-text">Start Timer</span>
+    </button>
+    <div id="actual-time-display">0m</div>
+    <div id="debug-output"></div>
+
+    <script>
+        let activeTimer = false;
+        let timerInterval = null;
+        const taskId = 1;
+        const estimatedDuration = 5;  // 5 minutes for testing
+        
+        function log(msg) {
+            console.log(msg);
+            document.getElementById('debug-output').innerHTML += msg + '<br>';
+        }
+
+        function toggleTimer() {
+            if (activeTimer) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            log('startTimer called');
+            activeTimer = true;
+            const now = new Date();
+            localStorage.setItem('activeTimer', taskId);
+            localStorage.setItem('timerStartedAt', now.toISOString());
+            log('Stored timerStartedAt: ' + now.toISOString());
+            updateTimerUI(true);
+            timerInterval = setInterval(updateRunningTimer, 1000);
+            updateRunningTimer(); // Update display immediately
+            log('Timer started successfully');
+        }
+
+        function stopTimer() {
+            log('stopTimer called');
+            clearInterval(timerInterval);
+            activeTimer = false;
+            localStorage.removeItem('activeTimer');
+            localStorage.removeItem('timerStartedAt');
+            updateTimerUI(false);
+            log('Timer stopped successfully');
+        }
+
+        function updateTimerUI(isRunning) {
+            const btn = document.getElementById('timer-btn');
+            const text = document.getElementById('timer-text');
+            
+            if (isRunning) {
+                text.textContent = 'Stop Timer';
+                log('UI updated: Stop Timer');
+            } else {
+                text.textContent = 'Start Timer';
+                log('UI updated: Start Timer');
+            }
+        }
+
+        function updateRunningTimer() {
+            const startedAt = localStorage.getItem('timerStartedAt');
+            if (!startedAt) {
+                log('ERROR: No timerStartedAt in localStorage');
+                return;
+            }
+
+            const start = new Date(startedAt);
+            const now = new Date();
+            
+            // Validate dates to prevent NaN
+            if (isNaN(start.getTime())) {
+                log('ERROR: Invalid timer start date');
+                localStorage.removeItem('timerStartedAt');
+                return;
+            }
+            
+            const elapsed = Math.floor((now - start) / 1000); // total seconds
+            
+            // Prevent negative values
+            if (elapsed < 0) {
+                log('ERROR: Negative elapsed time detected');
+                localStorage.removeItem('timerStartedAt');
+                return;
+            }
+
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+
+            const display = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timer-display').textContent = display;
+
+            // Update "Actual" time display with elapsed minutes
+            const elapsedMinutes = Math.floor(elapsed / 60);
+            const actualDisplay = document.getElementById('actual-time-display');
+            if (actualDisplay) {
+                actualDisplay.textContent = `${elapsedMinutes}m`;
+            }
+
+            log(`Timer: ${display}, Elapsed: ${elapsedMinutes}m`);
+
+            // Auto-stop when estimated duration is reached
+            if (estimatedDuration !== null) {
+                if (elapsedMinutes >= estimatedDuration) {
+                    log('Estimated duration reached! Auto-stopping...');
+                    stopTimer();
+                    alert(`⏱️ Estimated duration reached! Task completed.`);
+                }
+            }
+        }
+
+        // Test on page load
+        window.addEventListener('load', () => {
+            log('Page loaded');
+            log('localStorage activeTimer: ' + localStorage.getItem('activeTimer'));
+            log('localStorage timerStartedAt: ' + localStorage.getItem('timerStartedAt'));
+        });
+    </script>
+</body>
+</html>

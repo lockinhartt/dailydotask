@@ -345,9 +345,9 @@
 
                 <div class="time-stats">
                     <div class="time-stat">
-                        <div class="time-stat-label">Time Limit</div>
+                        <div class="time-stat-label">Estimated Duration</div>
                         <div class="time-stat-value">
-                            {% if task.time_limit %}{{ task.time_limit }}m{% else %}--{% endif %}
+                            {% if task.estimated_duration %}{{ task.estimated_duration }}m{% else %}--{% endif %}
                         </div>
                     </div>
                     <div class="time-stat">
@@ -478,6 +478,7 @@
                         localStorage.setItem('timerStartedAt', data.started_at);
                         updateTimerUI(true);
                         timerInterval = setInterval(updateRunningTimer, 1000);
+                        updateRunningTimer(); // Update display immediately
                     }
                 })
                 .catch(error => console.error('Error:', error));

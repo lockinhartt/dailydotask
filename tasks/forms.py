@@ -7,37 +7,16 @@ class TaskForm(forms.ModelForm):
     
     class Meta:
         model = Task
-        fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time', 'estimated_duration', 'time_limit']
+        fields = ['title', 'description', 'priority', 'status', 'due_date', 'due_time', 'time_limit', 'estimated_duration']
         widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter task title...'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'form-control',
-                'placeholder': 'Enter task description...',
-                'rows': 3
-            }),
-            'priority': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'status': forms.Select(attrs={
-                'class': 'form-select'
-            }),
-            'due_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'due_time': forms.TimeInput(attrs={
-                'class': 'form-control',
-                'type': 'time'
-            }),
-            'estimated_duration': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Duration in minutes',
-                'min': '1',
-                'step': '5'
-            }),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Task title', 'required': True}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Task description', 'required': True}),
+            'priority': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'status': forms.Select(attrs={'class': 'form-select', 'required': True}),
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': True}),
+            'due_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time', 'required': True}),
+            'time_limit': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Time limit in minutes', 'min': 1, 'step': 5, 'required': True}),
+            'estimated_duration': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Estimated duration in minutes', 'min': 1}),
         }
 
 

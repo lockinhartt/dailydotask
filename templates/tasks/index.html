@@ -870,8 +870,8 @@
                         <!-- Expandable Task Details -->
                         {% if task.description or task.ai_insights %}
                         <div class="task-details-toggle" style="margin-top: 0.75rem;">
-                            <button type="button" class="btn-expand" onclick="toggleTaskDetails({{ task.pk }})"
-                                id="toggle-{{ task.pk }}">
+                            <button type="button" class="btn-expand" data-task-id="{{ task.pk }}"
+                                onclick="toggleTaskDetails(this.dataset.taskId)" id="toggle-{{ task.pk }}">
                                 <i class="fas fa-chevron-down" id="icon-{{ task.pk }}"></i>
                                 <span>Show Details</span>
                             </button>
@@ -922,7 +922,8 @@
                             <i class="fas fa-lock"></i>
                         </button>
                         {% else %}
-                        <button type="button" class="btn-icon btn-edit" onclick="editTask({{ task.pk }})" title="Edit">
+                        <button type="button" class="btn-icon btn-edit" data-task-id="{{ task.pk }}"
+                            onclick="editTask(this.dataset.taskId)" title="Edit">
                             <i class="fas fa-edit"></i>
                         </button>
                         {% endif %}

@@ -19,4 +19,8 @@ urlpatterns = [
     path('start-timer/<int:pk>/', views.start_timer, name='start_timer'),
     path('stop-timer/<int:pk>/', views.stop_timer, name='stop_timer'),
     path('profile/', views.profile_view, name='profile'),
+    # Archive functionality
+    path('archive/', views.archive_list, name='archive_list'),
+    path('restore/<int:pk>/', views.restore_task, name='restore_task'),
+    path('delete-permanent/<int:pk>/', views.permanent_delete, name='permanent_delete'),
 ]

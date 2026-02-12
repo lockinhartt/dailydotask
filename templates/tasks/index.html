@@ -7,8 +7,43 @@
     <title>Daily Do - Smart Task Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Theme Variables - User-Specified Palette */
+        :root {
+            /* Light Theme */
+            --bg-primary: #FFFFFF; /* White - Page Background */
+            --bg-secondary: #E6F4EA; /* Light Sage - Cards */
+            --bg-header: #2F855A; /* Primary Green - Navbar/Header */
+            --text-primary: #2D2D2D; /* Dark Gray - Text */
+            --text-secondary: #2F855A; /* Primary Green - Secondary text */
+            --text-on-dark: #FFFFFF; /* White on dark */
+            --accent-primary: #2F855A; /* Primary Green - Buttons */
+            --accent-hover: #276749; /* Darker Green - Button Hover */
+            --accent-success: #2F855A; /* Primary Green - Success states */
+            --accent-warning: #ed8936; /* Warm orange for warnings */
+            --card-bg: #E6F4EA; /* Light Sage - Cards */
+            --card-hover-shadow: rgba(47, 133, 90, 0.15);
+            --border-color: #E0E0E0; /* Soft Gray - Borders/Lines */
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme - Inverted Palette */
+            --bg-primary: #2D2D2D; /* Dark Gray - Page Background */
+            --bg-secondary: #1a1a1a; /* Darker Gray - Background Accent */
+            --bg-header: #2F855A; /* Primary Green - Navbar/Header */
+            --text-primary: #FFFFFF; /* White - Text */
+            --text-secondary: #E6F4EA; /* Light Sage - Secondary text */
+            --text-on-dark: #FFFFFF; /* White on dark */
+            --accent-primary: #2F855A; /* Primary Green - Buttons */
+            --accent-hover: #276749; /* Darker Green - Button Hover */
+            --accent-success: #2F855A; /* Primary Green - Success states */
+            --accent-warning: #f6ad55; /* Soft orange for warnings */
+            --card-bg: #3a3a3a; /* Medium Dark Gray - Cards */
+            --card-hover-shadow: rgba(47, 133, 90, 0.25);
+            --border-color: #4a4a4a; /* Medium Gray - Borders/Lines */
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -17,27 +52,197 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            background-attachment: fixed;
+            background: var(--bg-primary);
             min-height: 100vh;
-            color: #1a202c;
+            color: var(--text-primary);
             line-height: 1.6;
+            animation: fadeIn 0.8s ease-out;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .animate-up {
+            animation: slideUp 0.6s ease-out forwards;
         }
 
         .main-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 2.5rem 1.5rem;
+            width: 100%;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar.collapsed .sidebar-header span {
+            display: none;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 0.75rem;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 0.25rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-primary);
+            color: var(--accent-primary);
+        }
+
+        .nav-item.active {
+            background: var(--bg-primary);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .sidebar.collapsed .nav-item span {
+            display: none;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .sidebar.collapsed .sidebar-footer span {
+            display: none;
+        }
+
+        /* Main Content wrapper */
+        .main-content {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            position: relative;
+            background: var(--bg-primary);
+        }
+
+        /* Floating Action Button (FAB) */
+        .fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 1100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            background: var(--bg-header);
+            color: white;
+        }
+
+        /* Progress Header inside Main Content */
+        .top-progress-header {
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-success);
+            width: 0%; /* Dynamic */
+            transition: width 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+            }
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            .main-content {
+                width: 100vw;
+            }
         }
 
         /* Enhanced Header */
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: var(--bg-header);
+            color: var(--text-on-dark);
+            border-radius: 0;
+            padding: 1.5rem 3rem;
+            margin-bottom: 0;
+            box-shadow: 0 2px 10px var(--card-hover-shadow);
+            animation: slideUp 0.7s ease-out;
+            transition: background-color 0.3s ease;
         }
 
         .header-top {
@@ -50,18 +255,14 @@
         .logo {
             font-size: 1.75rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--accent-success);
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
 
         .logo i {
-            color: #10b981;
-            -webkit-text-fill-color: #10b981;
+            color: var(--accent-success);
             font-size: 1.5rem;
         }
 
@@ -74,9 +275,9 @@
 
         .user-menu span {
             padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            color: #374151;
+            color: var(--text-on-dark);
             font-weight: 500;
         }
 
@@ -84,6 +285,7 @@
             padding: 0.5rem 1rem;
             border-radius: 20px;
             text-decoration: none;
+            color: var(--accent-success);
             font-weight: 500;
             transition: all 0.3s ease;
         }
@@ -93,11 +295,43 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-on-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle i {
+            font-size: 1rem;
+        }
+
         .subtitle {
-            color: #6b7280;
+            color: var(--text-on-dark);
+            opacity: 0.9;
             font-size: 0.95rem;
             text-align: center;
             margin-top: 0.5rem;
+        }
+
+        /* Content Wrapper for spacing */
+        .content-section {
+            padding: 1.5rem 3rem;
         }
 
         /* Search Bar */
@@ -122,7 +356,8 @@
             width: 100%;
             padding: 1rem 1.25rem 1rem 3.25rem;
             border: 2px solid transparent;
-            background: white;
+            background: var(--card-bg);
+            color: var(--text-primary);
             border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s ease;
@@ -131,14 +366,15 @@
 
         .search-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.25);
-            transform: translateY(-2px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 10px 25px var(--card-hover-shadow);
+            transform: translateY(-3px);
         }
 
         /* Filter Controls */
         .filter-controls {
-            background: white;
+            background: var(--card-bg);
+            color: var(--text-primary);
             border-radius: 16px;
             padding: 1.25rem;
             margin-bottom: 1.5rem;
@@ -147,6 +383,7 @@
             gap: 1.25rem;
             flex-wrap: wrap;
             align-items: center;
+            transition: background-color 0.3s ease;
         }
 
         .filter-group {
@@ -157,7 +394,7 @@
 
         .filter-label {
             font-size: 0.875rem;
-            color: #6b7280;
+            color: var(--text-secondary);
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -168,7 +405,8 @@
             border: 2px solid #e5e7eb;
             border-radius: 10px;
             font-size: 0.9rem;
-            background: white;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 500;
@@ -176,12 +414,12 @@
 
         .filter-select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
         }
 
         .filter-select:hover {
-            border-color: #667eea;
+            border-color: var(--accent-primary);
         }
 
         .show-completed-toggle {
@@ -195,44 +433,41 @@
             width: 20px;
             height: 20px;
             cursor: pointer;
-            accent-color: #667eea;
+            accent-color: var(--accent-primary);
         }
 
         /* Statistics Cards */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.25rem;
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.75rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             border: 2px solid transparent;
         }
 
         .stat-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-            border-color: #667eea;
+            box-shadow: 0 8px 20px var(--card-hover-shadow);
+            border-color: var(--accent-primary);
         }
 
         .stat-number {
             font-size: 2.25rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text-primary);
         }
 
         .stat-label {
-            color: #6b7280;
+            color: var(--text-secondary);
             font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -242,18 +477,24 @@
 
         /* Main Card */
         .card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background: var(--card-bg);
+            border-radius: 0;
+            padding: 2rem 3rem;
+            margin-bottom: 0;
+            box-shadow: none;
             border: none;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
         }
 
         .section-title {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1a202c;
+            color: var(--text-primary);
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
@@ -261,7 +502,7 @@
         }
 
         .section-title i {
-            color: #667eea;
+            color: var(--accent-primary);
         }
 
         /* Task Items */
@@ -284,37 +525,38 @@
         }
 
         .task-item:hover {
-            transform: translateX(4px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transform: translateX(8px) scale(1.01);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            border-left-width: 6px;
         }
 
         .task-item.completed {
             background: #f0fdf4;
-            border-left-color: #10b981;
+            border-left-color: var(--accent-success); /* Gentle green */
         }
 
         .task-item.in-progress {
-            background: #eff6ff;
-            border-left-color: #3b82f6;
+            background: #ebf8ff; /* Soft blue */
+            border-left-color: var(--accent-primary); /* Soft green */
         }
 
         .task-item.overdue {
-            background: #fef2f2;
-            border-left-color: #ef4444;
+            background: #fff5f0;
+            border-left-color: var(--accent-warning); /* Soft orange */
         }
 
         .task-item[data-priority="high"] {
-            border-left-color: #ef4444;
+            border-left-color: #fc8181; /* Softer red */
             border-left-width: 5px;
         }
 
         .task-item[data-priority="medium"] {
-            border-left-color: #f59e0b;
+            border-left-color: #f6ad55; /* Soft orange */
             border-left-width: 5px;
         }
 
         .task-item[data-priority="low"] {
-            border-left-color: #3b82f6;
+            border-left-color: #4299e1; /* Soft blue */
             border-left-width: 5px;
         }
 
@@ -336,13 +578,13 @@
         }
 
         .task-checkbox:hover {
-            border-color: #667eea;
-            background: #f3f4f6;
+            border-color: #2D6A4F; /* Emerald Green */
+            background: #E9F5DB;
         }
 
         .task-item.completed .task-checkbox {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border-color: #10b981;
+            background: linear-gradient(135deg, var(--accent-success), var(--accent-primary));
+            border-color: var(--accent-success);
             color: white;
         }
 
@@ -387,18 +629,18 @@
         }
 
         .badge-status-in_progress {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #E9F5DB;
+            color: #1B4332; /* Forest Green text */
         }
 
         .badge-status-completed {
             background: #d1fae5;
-            color: #065f46;
+            color: #1B4332; /* Forest Green */
         }
 
         .badge-priority-high {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #fff5f0;
+            color: #FF6F3C; /* Burnt Orange */
         }
 
         .badge-priority-medium {
@@ -407,18 +649,18 @@
         }
 
         .badge-priority-low {
-            background: #dbeafe;
-            color: #1e3a8a;
+            background: #f0fdf4;
+            color: #1B4332; /* Forest Green */
         }
 
         .badge-category {
-            background: #e0e7ff;
-            color: #3730a3;
+            background: #E9F5DB;
+            color: #1B4332; /* Forest Green */
         }
 
         .badge-difficulty {
-            background: #f3e8ff;
-            color: #6b21a8;
+            background: #E9F5DB;
+            color: #2D6A4F; /* Emerald Green */
         }
 
         .badge-due {
@@ -428,7 +670,9 @@
 
         .badge-overdue {
             background: #fee2e2;
-            color: #991b1b;
+            color: #dc2626;
+            font-weight: 700;
+            border: 2px solid #fca5a5;
             animation: pulse 2s ease-in-out infinite;
         }
 
@@ -437,10 +681,12 @@
             0%,
             100% {
                 opacity: 1;
+                transform: scale(1);
             }
 
             50% {
-                opacity: 0.7;
+                opacity: 0.8;
+                transform: scale(1.05);
             }
         }
 
@@ -466,13 +712,13 @@
         }
 
         .btn-timer {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, #2D6A4F, #1B4332); /* Emerald to Forest */
             color: white;
         }
 
         .btn-timer:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 6px 16px rgba(45, 106, 79, 0.4);
         }
 
         .btn-edit {
@@ -486,13 +732,13 @@
         }
 
         .btn-delete {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #FF6F3C, #e85a2c); /* Burnt Orange */
             color: white;
         }
 
         .btn-delete:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 6px 16px rgba(255, 111, 60, 0.4);
         }
 
         /* Empty State */
@@ -521,7 +767,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%); /* Forest to Emerald */
             color: white;
             border-radius: 16px 16px 0 0;
             padding: 1.5rem;
@@ -551,12 +797,12 @@
 
         .form-control:focus,
         .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #2D6A4F; /* Emerald Green */
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #2D6A4F, #1B4332); /* Emerald to Forest */
             border: none;
             padding: 0.75rem 1.5rem;
             border-radius: 10px;
@@ -566,7 +812,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(45, 106, 79, 0.4);
         }
 
         .btn-secondary {
@@ -637,9 +883,9 @@
         }
 
         .btn-expand:hover {
-            background: #f3f4f6;
-            border-color: #667eea;
-            color: #667eea;
+            background: #ecfdf5;
+            border-color: #2D6A4F; /* Emerald Green */
+            color: #2D6A4F;
         }
 
         .btn-expand i {
@@ -680,7 +926,7 @@
         .details-label {
             font-size: 0.75rem;
             font-weight: 600;
-            color: #667eea;
+            color: #2D6A4F; /* Emerald Green */
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
@@ -695,11 +941,110 @@
 
         .details-content {
             font-size: 0.9rem;
-            color: #4b5563;
+            color: var(--text-secondary);
             line-height: 1.6;
-            background: #f9fafb;
+            background: var(--bg-primary);
             padding: 0.75rem;
             border-radius: 8px;
+        }
+
+        /* Simplified Header for Full Width */
+        .header {
+            background: var(--bg-header);
+            color: var(--text-on-dark);
+            padding: 2rem 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px var(--card-hover-shadow);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo .brand {
+            font-size: 2.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            white-space: nowrap;
+            color: white;
+        }
+
+        .logo .brand i {
+            font-size: 2.5rem;
+        }
+
+        .logo .tagline {
+            font-size: 1.35rem;
+            opacity: 0.95;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            color: rgba(255, 255, 255, 0.95);
+            white-space: nowrap;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-menu .username {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            color: var(--text-on-dark);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-menu .username i {
+            font-size: 1rem;
+        }
+
+        .user-menu .divider {
+            width: 1px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 0.5rem;
+        }
+
+        .user-menu a {
+            color: var(--text-on-dark);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-menu a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .user-menu a.logout {
+            background: rgba(220, 38, 38, 0.2);
+            color: #fecaca;
+        }
+
+        .user-menu a.logout:hover {
+            background: rgba(220, 38, 38, 0.3);
+            color: white;
         }
     </style>
 </head>
@@ -709,50 +1054,76 @@
         <div class="header">
             <div class="header-top">
                 <div class="logo">
-                    <i class="fas fa-leaf"></i>
-                    Daily Do
+                    <div class="brand">
+                        <i class="fas fa-leaf"></i>
+                        Daily Do
+                    </div>
+                    <div class="tagline">Stay organized, get things done</div>
                 </div>
                 <div class="user-menu">
-                    <span>{{ user.username }}</span>
-                    <a href="{% url 'profile' %}" style="color: #38a169;"><i class="fas fa-user"></i> Profile</a>
-                    <a href="{% url 'logout' %}">Sign out</a>
+                    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                        <span id="themeText">Dark</span>
+                    </button>
+                    
+                    <div class="divider"></div>
+                    
+                    <span class="username">
+                        <i class="fas fa-user-circle"></i>
+                        {{ user.username }}
+                    </span>
+                    
+                    <a href="{% url 'archive_list' %}">
+                        <i class="fas fa-archive"></i>
+                        Archive
+                    </a>
+                    
+                    <a href="{% url 'profile' %}">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                    
+                    <a href="{% url 'logout' %}" class="logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Sign out
+                    </a>
                 </div>
             </div>
-            <p class="subtitle">Stay organized, get things done</p>
         </div>
 
-        <!-- Search Bar -->
-        <div class="search-bar">
-            <div class="search-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" class="search-input" id="searchInput" placeholder="Search tasks...">
+        <div class="content-section">
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search tasks...">
+                </div>
             </div>
-        </div>
 
-        <!-- Create Task Button -->
-        <div style="margin-bottom: 2rem;">
-            <a href="{% url 'create_task' %}" class="btn-create-task" style="
+            <!-- Create Task Button -->
+            <div style="margin-bottom: 2rem;">
+                <a href="{% url 'create_task' %}" class="btn-create-task" style="
                 display: inline-flex;
                 align-items: center;
                 gap: 0.75rem;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #2D6A4F, #1B4332);
                 color: white;
                 padding: 1rem 2rem;
                 border-radius: 12px;
                 text-decoration: none;
                 font-weight: 600;
                 font-size: 1.1rem;
-                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                box-shadow: 0 4px 15px rgba(45, 106, 79, 0.4);
                 transition: all 0.3s ease;
-            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 25px rgba(102, 126, 234, 0.5)'"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
-                <i class="fas fa-plus-circle" style="font-size: 1.25rem;"></i>
-                Create New Task
-            </a>
-        </div>
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 25px rgba(45, 106, 79, 0.5)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(45, 106, 79, 0.4)'">
+                    <i class="fas fa-plus-circle" style="font-size: 1.25rem;"></i>
+                    Create New Task
+                </a>
+            </div>
 
-        <!-- Filter Controls -->
-        <div class="filter-controls">
+            <!-- Filter Controls -->
+            <div class="filter-controls">
             <div class="filter-group">
                 <span class="filter-label">Status:</span>
                 <select class="filter-select" id="filterStatus">
@@ -760,7 +1131,6 @@
                     <option value="pending">Pending</option>
                     <option value="in_progress">In Progress</option>
                     <option value="completed">Completed</option>
-                    <option value="overdue">Overdue</option>
                 </select>
             </div>
 
@@ -948,8 +1318,9 @@
                 <p>No tasks yet. Add one above to get started!</p>
             </div>
             {% endif %}
-        </div>
-    </div>
+        </div> <!-- card -->
+        </div> <!-- content-section -->
+    </div> <!-- main-container -->
 
     <!-- Edit Task Modal -->
     <div class="modal fade" id="editModal" tabindex="-1">
@@ -1132,6 +1503,42 @@
         filterPriority.addEventListener('change', filterAndSortTasks);
         sortBy.addEventListener('change', filterAndSortTasks);
         showCompleted.addEventListener('change', filterAndSortTasks);
+
+        // Theme Toggle Functionality
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            updateThemeButton(newTheme);
+        }
+
+        function updateThemeButton(theme) {
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+                if (themeText) themeText.textContent = 'Light Mode';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                if (themeText) themeText.textContent = 'Dark Mode';
+            }
+        }
+
+        function toggleMobileSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        // Load saved theme on page load
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeButton(savedTheme);
+        })();
     </script>
 </body>
 

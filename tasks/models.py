@@ -45,6 +45,9 @@ class Task(models.Model):
     ai_difficulty_score = models.FloatField(null=True, blank=True)
     ai_difficulty_reasons = models.TextField(blank=True)
     
+    # Archive support for soft delete
+    is_archived = models.BooleanField(default=False, help_text="Task is in archive instead of deleted")
+    
     class Meta:
         ordering = ['-created_at']
     

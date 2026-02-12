@@ -15,12 +15,23 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2F855A; /* Primary Green */
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .auth-container {
@@ -52,23 +63,25 @@
         }
 
         .card {
-            background: white;
-            border-radius: 20px;
+            background: #E6F4EA; /* Light Sage */
+            border-radius: 16px;
             padding: 3rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.6s ease-out;
         }
 
         h2 {
-            color: #2d3748;
+            color: #2D2D2D; /* Dark Gray */
             font-size: 1.75rem;
             margin-bottom: 0.5rem;
             text-align: center;
         }
 
         .subtitle {
-            color: #718096;
+            color: #2D2D2D; /* Dark Gray */
             text-align: center;
             margin-bottom: 2rem;
+            opacity: 0.7;
         }
 
         .form-group {
@@ -77,10 +90,10 @@
 
         label {
             display: block;
-            color: #2d3748;
+            color: #2D2D2D; /* Dark Gray */
             font-weight: 600;
             margin-bottom: 0.5rem;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         input[type="text"],
@@ -88,17 +101,19 @@
         input[type="password"] {
             width: 100%;
             padding: 0.875rem 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
+            border: 1px solid #E0E0E0; /* Soft Gray */
+            border-radius: 10px;
             font-size: 1rem;
             font-family: inherit;
             transition: all 0.3s ease;
+            background: #FFFFFF; /* White */
+            color: #2D2D2D; /* Dark Gray */
         }
 
         input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #2F855A; /* Primary Green */
+            box-shadow: 0 0 0 3px rgba(47, 133, 90, 0.1);
         }
 
         .btn {
@@ -117,14 +132,14 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2D6A4F, #1B4332); /* Emerald to Forest */
             color: white;
             margin-top: 1rem;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(45, 106, 79, 0.3);
         }
 
         .divider {

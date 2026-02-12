@@ -100,7 +100,7 @@ def index(request):
         'pending_tasks': pending_tasks,
         'completed_today': completed_today,
     }
-    return render(request, 'tasks\index.html', context)
+    return render(request, 'tasks/index.html', context)
 
 
 @login_required
